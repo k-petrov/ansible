@@ -1,0 +1,103 @@
+---
+- name: Create Zookeeper service file
+  template:
+    src: templates/zookeeper.service.j2
+    dest: /etc/systemd/system/zookeeper.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Daemon reload
+
+- name: Create /etc/zookeeper direcoty
+  file:
+    path: /etc/zookeeper
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Create /var/lib/zookeeper directory
+  file:
+    path: /var/lib/zookeeper
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Create /etc/zookeeper/myid file
+  template:
+    src: templates/myid.j2
+    dest: /etc/zookeeper/myid
+    owner: kafka
+    group: kafka
+    mode: '0644'
+
+- name: Create {{dataDir}}
+  file:
+    path: '{{ dataDir }}'
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
+- name: Create {{ dataDir }}/myid symbolic link
+  file:
+    src: /etc/zookeeper/myid
+    dest: '{{dataDir}}/myid'
+    state: link
+  notify: Restart zookeeper
+
+- name: Create Zookeeper config file
+  template:
+    src: templates/zookeeper.j2
+    dest: /etc/zookeeper/zoo.cfg
+    owner: kafka
+    group: kafka
+    mode: '0644'
+  notify: Restart zookeeper
+
+
+- name: Create Kafka service file
+  template:
+    src: templates/kafka.service.j2
+    dest: /etc/systemd/system/kafka.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Daemon reload
+
+- name: Create Kafka config file
+  template:
+    src: templates/kafka.j2
+    dest: '{{kafka_dir}}/config/server.properties'
+    owner: kafka
+    group: kafka
+    mode: '0644'
+  notify: Restart kafka
+
+- name: Jolokia-telegraf config 
+  template:
+    src: templates/jolokia_telegraf.j2
+    dest: /etc/telegraf/telegraf.d/input-jolokia.conf
+    owner: telegraf
+    group: telegraf
+    mode: '0644'
+  notify: Restart telegraf
+
+- name: Make sure the kafka service unit is enabled and running
+  systemd:
+    state: started
+    name: kafka
+    enabled: yes
+
+- name: Make sure the zookeeper service unit is enabled and running
+  systemd:
+    state: started
+    name: zookeeper
+    enabled: yes
+
+- name: Make sure the telegraf service unit is enabled and running
+  systemd:
+    state: started
+    name: telegraf
+    enabled: yes
