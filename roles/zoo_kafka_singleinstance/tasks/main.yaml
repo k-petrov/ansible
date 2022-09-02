@@ -83,6 +83,12 @@
     group: telegraf
     mode: '0644'
   notify: Restart telegraf
+  
+- name: Make sure the zookeeper service unit is enabled and running
+  systemd:
+    state: started
+    name: zookeeper
+    enabled: yes
 
 - name: Make sure the kafka service unit is enabled and running
   systemd:
@@ -90,11 +96,6 @@
     name: kafka
     enabled: yes
 
-- name: Make sure the zookeeper service unit is enabled and running
-  systemd:
-    state: started
-    name: zookeeper
-    enabled: yes
 
 - name: Make sure the telegraf service unit is enabled and running
   systemd:
