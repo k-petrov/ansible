@@ -57,6 +57,22 @@
   notify: Restart zookeeper
 
 
+- name: Create /var/lib/kafka/data/kafka_tmp_folder directory
+  file:
+    path: /var/lib/kafka/data/kafka_tmp_folder
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+    
+- name: Create /var/lib/kafka/data/kafka-logs directory
+  file:
+    path: /var/lib/kafka/data/kafka-logs
+    state: directory
+    owner: kafka
+    group: kafka
+    mode: '0755'
+
 - name: Create Kafka service file
   template:
     src: templates/kafka.service.j2
@@ -95,7 +111,6 @@
     state: started
     name: kafka
     enabled: yes
-
 
 - name: Make sure the telegraf service unit is enabled and running
   systemd:
